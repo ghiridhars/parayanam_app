@@ -219,8 +219,8 @@ class _DayPlanningScreenState extends State<DayPlanningScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   elevation: dayStatus.isDone ? 4 : 2,
                   color: dayStatus.isDone 
-                      ? Colors.green.shade50.withOpacity(0.7)
-                      : Colors.white.withOpacity(0.7),
+                      ? Colors.green.shade50.withValues(alpha: 0.7)
+                      : Colors.white.withValues(alpha: 0.7),
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(4),

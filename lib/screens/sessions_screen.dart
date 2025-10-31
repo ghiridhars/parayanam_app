@@ -114,7 +114,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
           Card(
             margin: const EdgeInsets.all(16),
             elevation: 4,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             child: TableCalendar(
               firstDay: DateTime.utc(2020, 1, 1),
               lastDay: DateTime.utc(2030, 12, 31),
@@ -250,7 +250,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
-          color: Colors.white.withOpacity(0.7),
+          color: Colors.white.withValues(alpha: 0.7),
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(4),

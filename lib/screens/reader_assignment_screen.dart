@@ -330,7 +330,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
             Card(
             margin: const EdgeInsets.all(16),
             elevation: 4,
-            color: Colors.white.withOpacity(0.7),
+            color: Colors.white.withValues(alpha: 0.7),
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -534,7 +534,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         elevation: 2,
-                        color: Colors.white.withOpacity(0.7),
+                        color: Colors.white.withValues(alpha: 0.7),
                         child: ListTile(
                           leading: CircleAvatar(
                             backgroundColor: _getCategoryColor(category.id),
