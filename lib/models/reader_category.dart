@@ -1,3 +1,5 @@
+import '../core/constants/app_constants.dart';
+
 class ReaderCategory {
   final String id;
   final String name;
@@ -10,7 +12,7 @@ class ReaderCategory {
     required this.name,
     required this.description,
     required this.lineCount,
-    this.paragraphCount = 10, // Default paragraph count
+    this.paragraphCount = AppConstants.categoryAParagraphs, // Default paragraph count
   });
 
   static List<ReaderCategory> getDefaultCategories() {
@@ -19,29 +21,29 @@ class ReaderCategory {
         id: 'A',
         name: 'Category A',
         description: 'Reader who reads more than 100 lines',
-        lineCount: 100,
-        paragraphCount: 10,
+        lineCount: AppConstants.categoryALines,
+        paragraphCount: AppConstants.categoryAParagraphs,
       ),
       ReaderCategory(
         id: 'B',
         name: 'Category B',
         description: 'Reader who reads 60 - 80 lines',
-        lineCount: 70,
-        paragraphCount: 7,
+        lineCount: AppConstants.categoryBLines,
+        paragraphCount: AppConstants.categoryBParagraphs,
       ),
       ReaderCategory(
         id: 'C',
         name: 'Category C',
         description: 'Reader who reads 40 - 60 lines',
-        lineCount: 50,
-        paragraphCount: 5,
+        lineCount: AppConstants.categoryCLines,
+        paragraphCount: AppConstants.categoryCParagraphs,
       ),
       ReaderCategory(
         id: 'D',
         name: 'Category D',
         description: 'Reader who reads less than 40 lines',
-        lineCount: 30,
-        paragraphCount: 3,
+        lineCount: AppConstants.categoryDLines,
+        paragraphCount: AppConstants.categoryDParagraphs,
       ),
     ];
   }
@@ -62,7 +64,7 @@ class ReaderCategory {
       name: json['name'],
       description: json['description'],
       lineCount: json['lineCount'],
-      paragraphCount: json['paragraphCount'] ?? 10,
+      paragraphCount: json['paragraphCount'] ?? AppConstants.categoryAParagraphs,
     );
   }
 }

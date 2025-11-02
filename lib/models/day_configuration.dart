@@ -1,3 +1,5 @@
+import '../core/constants/app_constants.dart';
+
 class DayConfiguration {
   final int dayNumber;
   int maxLines;
@@ -6,7 +8,7 @@ class DayConfiguration {
   DayConfiguration({
     required this.dayNumber,
     required this.maxLines,
-    this.maxParagraphs = 100, // Default max paragraphs per day
+    this.maxParagraphs = AppConstants.defaultMaxParagraphsPerDay,
   });
 
   Map<String, dynamic> toJson() {
@@ -21,7 +23,7 @@ class DayConfiguration {
     return DayConfiguration(
       dayNumber: json['dayNumber'],
       maxLines: json['maxLines'],
-      maxParagraphs: json['maxParagraphs'] ?? 100,
+      maxParagraphs: json['maxParagraphs'] ?? AppConstants.defaultMaxParagraphsPerDay,
     );
   }
 
@@ -30,8 +32,8 @@ class DayConfiguration {
       totalDays,
       (index) => DayConfiguration(
         dayNumber: index + 1,
-        maxLines: 1000, // Default max lines per day
-        maxParagraphs: 100, // Default max paragraphs per day
+        maxLines: AppConstants.defaultMaxLinesPerDay,
+        maxParagraphs: AppConstants.defaultMaxParagraphsPerDay,
       ),
     );
   }

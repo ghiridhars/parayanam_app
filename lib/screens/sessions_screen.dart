@@ -25,11 +25,13 @@ class SessionsScreen extends StatefulWidget {
 class _SessionsScreenState extends State<SessionsScreen> {
   final DataService _dataService = DataService();
   final DateFormat _dateFormat = DateFormat('MMM dd, yyyy');
+  final DateFormat _monthFormat = DateFormat('MMMM yyyy');
   
   List<ReadingSession> _allSessions = [];
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   bool _isLoading = true;
+  bool _filterByDay = false; // Track if filtering by specific day or showing month view
 
   @override
   void initState() {
@@ -56,6 +58,27 @@ class _SessionsScreenState extends State<SessionsScreen> {
     if (widget.selectedBook != null) {
       return sessions.where((s) => s.bookId == widget.selectedBook!.id).toList();
     }
+    
+    return sessions;
+  }
+
+  List<ReadingSession> _getSessionsForMonth(DateTime month) {
+    final firstDayOfMonth = DateTime(month.year, month.month, 1);
+    final lastDayOfMonth = DateTime(month.year, month.month + 1, 0);
+    
+    final sessions = _allSessions.where((session) {
+      // Include session if it overlaps with any day in the month
+      return (session.startDate.isBefore(lastDayOfMonth.add(const Duration(days: 1))) &&
+              session.endDate.isAfter(firstDayOfMonth.subtract(const Duration(days: 1))));
+    }).toList();
+    
+    // Filter by selected book if specified
+    if (widget.selectedBook != null) {
+      return sessions.where((s) => s.bookId == widget.selectedBook!.id).toList();
+    }
+    
+    // Sort by start date
+    sessions.sort((a, b) => a.startDate.compareTo(b.startDate));
     
     return sessions;
   }
@@ -142,10 +165,15 @@ class _SessionsScreenState extends State<SessionsScreen> {
                 setState(() {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
+                  _filterByDay = true; // Enable day filter when a day is clicked
                 });
               },
               onPageChanged: (focusedDay) {
-                _focusedDay = focusedDay;
+                setState(() {
+                  _focusedDay = focusedDay;
+                  _filterByDay = false; // Reset to month view when changing months
+                  _selectedDay = null;
+                });
               },
               calendarBuilders: CalendarBuilders(
                 markerBuilder: (context, date, sessions) {
@@ -177,9 +205,45 @@ class _SessionsScreenState extends State<SessionsScreen> {
 
           // Selected Day Sessions
           Expanded(
-            child: _selectedDay == null
-                ? const Center(child: Text('Select a day to view sessions'))
-                : _buildSessionsList(),
+            child: Column(
+              children: [
+                // Header with view toggle
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  color: Colors.white.withValues(alpha: 0.7),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        _filterByDay && _selectedDay != null
+                            ? 'Sessions on ${_dateFormat.format(_selectedDay!)}'
+                            : 'All Sessions in ${_monthFormat.format(_focusedDay)}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (_filterByDay && _selectedDay != null)
+                        TextButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _filterByDay = false;
+                              _selectedDay = null;
+                            });
+                          },
+                          icon: const Icon(Icons.view_list, size: 18),
+                          label: const Text('Show All Month'),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                // Sessions list
+                Expanded(child: _buildSessionsList()),
+              ],
+            ),
           ),
         ],
         ),
@@ -207,12 +271,19 @@ class _SessionsScreenState extends State<SessionsScreen> {
   }
 
   Widget _buildSessionsList() {
-    final sessionsForDay = _getSessionsForDay(_selectedDay!);
+    // Get sessions based on filter mode
+    final List<ReadingSession> sessionsToShow;
     
-    // Filter by selected book if specified
-    final filteredSessions = widget.selectedBook != null
-        ? sessionsForDay.where((s) => s.bookId == widget.selectedBook!.id).toList()
-        : sessionsForDay;
+    if (_filterByDay && _selectedDay != null) {
+      // Day view: show only sessions for the selected day
+      sessionsToShow = _getSessionsForDay(_selectedDay!);
+    } else {
+      // Month view: show all sessions in the current month
+      sessionsToShow = _getSessionsForMonth(_focusedDay);
+    }
+    
+    // Filter by selected book if specified (already done in helper methods)
+    final filteredSessions = sessionsToShow;
     
     if (filteredSessions.isEmpty) {
       return Center(
@@ -226,9 +297,13 @@ class _SessionsScreenState extends State<SessionsScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              widget.selectedBook != null
-                  ? 'No ${widget.selectedBook!.displayName} sessions on ${_dateFormat.format(_selectedDay!)}'
-                  : 'No sessions on ${_dateFormat.format(_selectedDay!)}',
+              _filterByDay && _selectedDay != null
+                  ? (widget.selectedBook != null
+                      ? 'No ${widget.selectedBook!.displayName} sessions on ${_dateFormat.format(_selectedDay!)}'
+                      : 'No sessions on ${_dateFormat.format(_selectedDay!)}')
+                  : (widget.selectedBook != null
+                      ? 'No ${widget.selectedBook!.displayName} sessions in ${_monthFormat.format(_focusedDay)}'
+                      : 'No sessions in ${_monthFormat.format(_focusedDay)}'),
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey.shade600,
@@ -420,6 +495,30 @@ class _SessionsScreenState extends State<SessionsScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () async {
+                          Navigator.pop(context); // Close modal first
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CreateSessionScreen(
+                                userProfile: widget.userProfile,
+                                selectedBook: widget.selectedBook,
+                                editSession: session,
+                              ),
+                            ),
+                          );
+                          
+                          if (result == true) {
+                            _loadSessions();
+                          }
+                        },
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Edit'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () async {
                           final confirmed = await showDialog<bool>(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -452,33 +551,36 @@ class _SessionsScreenState extends State<SessionsScreen> {
                         label: const Text('Delete', style: TextStyle(color: Colors.red)),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: session.isActive()
-                            ? () {
-                                Navigator.pop(context);
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => DayPlanningScreen(
-                                      session: session,
-                                      book: book,
-                                      userProfile: widget.userProfile,
-                                    ),
-                                  ),
-                                );
-                              }
-                            : null,
-                        icon: const Icon(Icons.assignment_ind),
-                        label: Text(session.isActive() ? 'Assign Readers' : 'Not Active'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.white,
-                        ),
-                      ),
-                    ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                // Assign Readers button (full width)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: session.isActive()
+                        ? () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DayPlanningScreen(
+                                  session: session,
+                                  book: book,
+                                  userProfile: widget.userProfile,
+                                ),
+                              ),
+                            );
+                          }
+                        : null,
+                    icon: const Icon(Icons.assignment_ind),
+                    label: Text(session.isActive() ? 'Assign Readers' : 'Session Not Active'),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
                 ),
               ],
             ),

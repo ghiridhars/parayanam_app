@@ -41,7 +41,11 @@ class _DayPlanningScreenState extends State<DayPlanningScreen> {
 
   Future<void> _loadDayStatuses() async {
     final statuses = await _dataService.loadDayStatuses(widget.session.id, widget.book.totalDays);
-    final configs = await _dataService.loadDayConfigurations(widget.book.id, widget.book.totalDays);
+    
+    // Load session-specific day configurations (not book defaults)
+    final configs = await _dataService.loadSessionDayConfig(widget.session.id)
+        ?? await _dataService.loadDayConfigurations(widget.book.id, widget.book.totalDays);
+    
     setState(() {
       _dayStatuses = statuses;
       _dayConfigs = configs;

@@ -1,3 +1,5 @@
+import '../core/constants/app_constants.dart';
+
 class ReadingSession {
   final String id;
   final String name;
@@ -60,16 +62,6 @@ class ReadingSession {
     );
   }
 
-  static List<String> availableColors = [
-    '#FF6B6B', // Red
-    '#4ECDC4', // Teal
-    '#45B7D1', // Blue
-    '#FFA07A', // Light Salmon
-    '#98D8C8', // Mint
-    '#F7DC6F', // Yellow
-    '#BB8FCE', // Purple
-    '#85C1E2', // Sky Blue
-    '#F8B500', // Orange
-    '#2ECC71', // Green
-  ];
+  /// Available colors for session visualization on calendar
+  static List<String> get availableColors => AppConstants.sessionColors;
 }

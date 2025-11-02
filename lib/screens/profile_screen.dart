@@ -95,7 +95,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (confirmed == true) {
-      await _dataService.clearUserProfile();
+      await _dataService.logoutUser();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,

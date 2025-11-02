@@ -53,8 +53,21 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
     // Filter readers for selected day
     final readers = allReaders.where((r) => r.dayNumber == widget.selectedDay).toList();
     
-    final categories = await _dataService.loadCategories(widget.book.id);
-    final dayConfigs = await _dataService.loadDayConfigurations(widget.book.id, widget.book.totalDays);
+    // Load session-specific config if session exists, otherwise load book defaults
+    List<ReaderCategory> categories;
+    List<DayConfiguration> dayConfigs;
+    
+    if (widget.session != null) {
+      // Use session-specific configuration
+      categories = await _dataService.loadSessionCategories(widget.session!.id)
+          ?? await _dataService.loadCategories(widget.book.id);
+      dayConfigs = await _dataService.loadSessionDayConfig(widget.session!.id)
+          ?? await _dataService.loadDayConfigurations(widget.book.id, widget.book.totalDays);
+    } else {
+      // Fallback to book defaults (for backward compatibility)
+      categories = await _dataService.loadCategories(widget.book.id);
+      dayConfigs = await _dataService.loadDayConfigurations(widget.book.id, widget.book.totalDays);
+    }
     
     // Calculate current line and paragraph based on previous days
     int currentLine = 1;

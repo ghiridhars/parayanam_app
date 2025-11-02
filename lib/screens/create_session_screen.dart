@@ -64,8 +64,22 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
     if (_selectedBookId == null) return;
     
     final book = Book.availableBooks.firstWhere((b) => b.id == _selectedBookId);
-    final categories = await _dataService.loadCategories(_selectedBookId!);
-    final dayConfigs = await _dataService.loadDayConfigurations(_selectedBookId!, book.totalDays);
+    
+    // Load session-specific config if editing, otherwise load book defaults
+    List<ReaderCategory> categories;
+    List<DayConfiguration> dayConfigs;
+    
+    if (widget.editSession != null) {
+      // Editing existing session - load session-specific config
+      categories = await _dataService.loadSessionCategories(widget.editSession!.id) 
+          ?? await _dataService.loadCategories(_selectedBookId!);
+      dayConfigs = await _dataService.loadSessionDayConfig(widget.editSession!.id)
+          ?? await _dataService.loadDayConfigurations(_selectedBookId!, book.totalDays);
+    } else {
+      // Creating new session - load book defaults
+      categories = await _dataService.loadCategories(_selectedBookId!);
+      dayConfigs = await _dataService.loadDayConfigurations(_selectedBookId!, book.totalDays);
+    }
     
     setState(() {
       _categories = categories;
