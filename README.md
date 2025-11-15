@@ -46,8 +46,8 @@ A Flutter application for managing reading assignments for religious texts like 
 - User profile information display
 - **Default Day Configuration** for each book:
   - Bhagavatam: 7 days
-  - Set default maximum **lines and paragraphs** per day
-  - Default: 1000 lines and 100 paragraphs per day (both configurable)
+  - Set default maximum **lines, paragraphs, and chapters** per day
+  - Default: 1000 lines, 100 paragraphs, and 50 chapters per day (all configurable)
 - **Default Reader Categories** per book:
   - **Category A**: Readers who read more than 100 lines (default: 100 lines, 10 paragraphs)
   - **Category B**: Readers who read 60-80 lines (default: 70 lines, 7 paragraphs)
@@ -60,21 +60,23 @@ A Flutter application for managing reading assignments for religious texts like 
 ### 6. Reader Assignment Screen
 - **Day tracking**: Shows current day (e.g., "Day 1 of 7")
 - **Day limit monitoring**: 
-  - Displays maximum **lines and paragraphs** allowed for current day
-  - **Dual progress bars** showing usage for both lines and paragraphs
-  - Auto-prompt to move to next day when either limit is reached
+  - Displays maximum **lines, paragraphs, and chapters** allowed for current day
+  - **Triple progress bars** showing usage for lines, paragraphs, and chapters
+  - Auto-prompt to move to next day when any limit is reached
 - Add readers with name and category selection
 - Quick access to category settings via settings icon
-- **Dual assignment system**:
+- **Triple assignment system**:
   - **Line assignment**: Current line number (continues from last reader)
   - **Paragraph assignment**: Current paragraph number (continues from last reader)
-  - Both tracked separately and assigned based on selected category
+  - **Chapter assignment**: Current chapter number (continues from last reader)
+  - All three tracked separately and assigned based on selected category
   - Punch-in time (automatically recorded)
-  - Day limits for both lines and paragraphs (warns when approaching either limit)
+  - Day limits for lines, paragraphs, and chapters (warns when approaching any limit)
 - View all assigned readers with:
   - Name and category
   - Assigned **line range** (start to end) with total lines
   - Assigned **paragraph range** (start to end) with total paragraphs
+  - Assigned **chapter range** (start to end) with total chapters
   - Punch-in time and date
 - **Delete individual readers**: 
   - Click the delete icon on any reader card
@@ -106,11 +108,11 @@ A Flutter application for managing reading assignments for religious texts like 
      - **End Date**: When reading ends (typically 7 days later for Bhagavatam)
      - **Color**: Choose a color for calendar visualization
    - Configure **Day Settings**:
-     - Set maximum **lines and paragraphs** for each of the 7 days
-     - Each day can have different limits for both metrics
+     - Set maximum **lines, paragraphs, and chapters** for each of the 7 days
+     - Each day can have different limits for all three metrics
    - Configure **Category Settings**:
-     - Set **lines and paragraphs** for categories A, B, C, D
-     - Both values customizable per category
+     - Set **lines, paragraphs, and chapters** for categories A, B, C, D
+     - All values customizable per category
    - Click **"Create Session"**
 
 4. **View Sessions in Calendar**
@@ -125,17 +127,18 @@ A Flutter application for managing reading assignments for religious texts like 
 5. **Assign readers** - During active session:
    - From book selection, tap on Bhagavatam
    - See current day indicator (Day X of 7)
-   - Check **dual progress bars** for lines and paragraphs
+   - Check **triple progress bars** for lines, paragraphs, and chapters
    - Enter the reader's name
-   - Select their category (A, B, C, or D) - shows lines and paragraphs (e.g., "100 lines, 10 ¶")
+   - Select their category (A, B, C, or D) - shows lines, paragraphs, and chapters (e.g., "100L, 10¶, 5Ch")
    - Click "Add Reader"
    - App automatically:
      - Assigns **line numbers** (e.g., Lines 1-100)
      - Assigns **paragraph numbers** (e.g., Paragraphs 1-10)
+     - Assigns **chapter numbers** (e.g., Chapters 1-5)
      - Records punch-in time
-     - Checks **both** day limits (lines and paragraphs)
-     - Prompts to move to next day if either limit is reached
-   - Success message shows both assignments (e.g., "Lines 1-100, Paragraphs 1-10")
+     - Checks **all three** day limits (lines, paragraphs, and chapters)
+     - Prompts to move to next day if any limit is reached
+   - Success message shows all three assignments (e.g., "Lines 1-100, Paragraphs 1-10, Chapters 1-5")
 
 6. **Manage Reader Assignments**:
    - View all readers in reverse chronological order (newest first)
@@ -143,6 +146,7 @@ A Flutter application for managing reading assignments for religious texts like 
      - Name and category badge
      - Line range with total count
      - Paragraph range with total count (marked with ¶ symbol)
+     - Chapter range with total count (marked with ch symbol)
      - Punch-in timestamp
    - **Delete individual readers**:
      - Click the red delete icon on any reader card

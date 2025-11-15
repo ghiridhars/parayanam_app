@@ -6,6 +6,7 @@ class ReaderCategory {
   final String description;
   int lineCount;
   int paragraphCount;
+  int chapterCount;
 
   ReaderCategory({
     required this.id,
@@ -13,6 +14,7 @@ class ReaderCategory {
     required this.description,
     required this.lineCount,
     this.paragraphCount = AppConstants.categoryAParagraphs, // Default paragraph count
+    this.chapterCount = AppConstants.categoryAChapters, // Default chapter count
   });
 
   static List<ReaderCategory> getDefaultCategories() {
@@ -23,6 +25,7 @@ class ReaderCategory {
         description: 'Reader who reads more than 100 lines',
         lineCount: AppConstants.categoryALines,
         paragraphCount: AppConstants.categoryAParagraphs,
+        chapterCount: AppConstants.categoryAChapters,
       ),
       ReaderCategory(
         id: 'B',
@@ -30,6 +33,7 @@ class ReaderCategory {
         description: 'Reader who reads 60 - 80 lines',
         lineCount: AppConstants.categoryBLines,
         paragraphCount: AppConstants.categoryBParagraphs,
+        chapterCount: AppConstants.categoryBChapters,
       ),
       ReaderCategory(
         id: 'C',
@@ -37,6 +41,7 @@ class ReaderCategory {
         description: 'Reader who reads 40 - 60 lines',
         lineCount: AppConstants.categoryCLines,
         paragraphCount: AppConstants.categoryCParagraphs,
+        chapterCount: AppConstants.categoryCChapters,
       ),
       ReaderCategory(
         id: 'D',
@@ -44,6 +49,7 @@ class ReaderCategory {
         description: 'Reader who reads less than 40 lines',
         lineCount: AppConstants.categoryDLines,
         paragraphCount: AppConstants.categoryDParagraphs,
+        chapterCount: AppConstants.categoryDChapters,
       ),
     ];
   }
@@ -55,6 +61,7 @@ class ReaderCategory {
       'description': description,
       'lineCount': lineCount,
       'paragraphCount': paragraphCount,
+      'chapterCount': chapterCount,
     };
   }
 
@@ -65,6 +72,7 @@ class ReaderCategory {
       description: json['description'],
       lineCount: json['lineCount'],
       paragraphCount: json['paragraphCount'] ?? AppConstants.categoryAParagraphs,
+      chapterCount: json['chapterCount'] ?? AppConstants.categoryAChapters,
     );
   }
 }

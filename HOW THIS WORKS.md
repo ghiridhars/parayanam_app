@@ -126,21 +126,24 @@ Represents an individual reader assignment.
 - `endLine`: Ending line number
 - `startParagraph`: Starting paragraph number
 - `endParagraph`: Ending paragraph number
+- `startChapter`: Starting chapter number
+- `endChapter`: Ending chapter number
 - `bookId`: Book reference
 - `dayNumber`: Day of reading (1-7 for Bhagavatam)
 
 **Computed Properties:**
 - `totalLines`: endLine - startLine + 1
 - `totalParagraphs`: endParagraph - startParagraph + 1
+- `totalChapters`: endChapter - startChapter + 1
 
 ### 4. ReaderCategory
 Defines reading capacity categories for readers.
 
 **Default Categories:**
-- **Category A**: 100 lines, 10 paragraphs (High capacity readers)
-- **Category B**: 70 lines, 7 paragraphs (Medium-high capacity)
-- **Category C**: 50 lines, 5 paragraphs (Medium capacity)
-- **Category D**: 30 lines, 3 paragraphs (Lower capacity)
+- **Category A**: 100 lines, 10 paragraphs, 5 chapters (High capacity readers)
+- **Category B**: 70 lines, 7 paragraphs, 3 chapters (Medium-high capacity)
+- **Category C**: 50 lines, 5 paragraphs, 2 chapters (Medium capacity)
+- **Category D**: 30 lines, 3 paragraphs, 1 chapter (Lower capacity)
 
 **Properties:**
 - `id`: Category identifier (A, B, C, D)
@@ -148,6 +151,7 @@ Defines reading capacity categories for readers.
 - `description`: Category description
 - `lineCount`: Default lines per reader
 - `paragraphCount`: Default paragraphs per reader
+- `chapterCount`: Default chapters per reader
 
 **Color Coding in UI:**
 - Category A: Green
@@ -162,10 +166,12 @@ Defines daily reading limits for a specific day.
 - `dayNumber`: Day number (1-7 for Bhagavatam)
 - `maxLines`: Maximum lines allowed for the day
 - `maxParagraphs`: Maximum paragraphs allowed for the day
+- `maxChapters`: Maximum chapters allowed for the day
 
 **Default Values:**
 - maxLines: 1000 lines per day
 - maxParagraphs: 100 paragraphs per day
+- maxChapters: 50 chapters per day
 
 ### 6. DayStatus
 Tracks completion status of each day in a session.
@@ -813,16 +819,16 @@ Session 2: "Bhagavatam Evening Group"
   - Color: Blue
 ```
 
-### 2. Dual Progress Tracking
+### 2. Triple Progress Tracking
 
-**Capability**: Track both lines and paragraphs independently
+**Capability**: Track lines, paragraphs, and chapters independently
 
-**Rationale**: Religious texts are structured in both lines and logical paragraphs
+**Rationale**: Religious texts are structured in lines, logical paragraphs, and thematic chapters
 
 **Implementation:**
-- Each reader assigned both line and paragraph ranges
+- Each reader assigned line, paragraph, and chapter ranges
 - Separate progress bars for each metric
-- Day limits enforced for both
+- Day limits enforced for all three
 - Independent counters maintained
 
 **Visual:**
@@ -830,10 +836,12 @@ Session 2: "Bhagavatam Evening Group"
 Reader Assignment:
 Lines: 1-100 (100 total)
 Paragraphs: 1-10 (10 total)
+Chapters: 1-5 (5 total)
 
 Day Progress:
 Lines: ▓▓▓▓▓░░░░░ 500/1000 (50%)
 Paragraphs: ▓▓▓▓▓░░░░░ 50/100 (50%)
+Chapters: ▓▓▓░░░░░░░ 25/50 (50%)
 ```
 
 ### 3. Flexible Category System
@@ -917,8 +925,11 @@ startLine = currentLine;
 endLine = currentLine + category.lineCount - 1;
 startParagraph = currentParagraph;
 endParagraph = currentParagraph + category.paragraphCount - 1;
+startChapter = currentChapter;
+endChapter = currentChapter + category.chapterCount - 1;
 currentLine = endLine + 1;
 currentParagraph = endParagraph + 1;
+currentChapter = endChapter + 1;
 ```
 
 ### 7. Reader Deletion with Recalculation
@@ -1474,7 +1485,7 @@ The Parayanam Reading Management App is a comprehensive solution for coordinatin
 - **Usability**: Intuitive UI with Material Design
 - **Scalability**: Extensible to additional books and features
 
-The app successfully addresses the complex requirements of managing multi-day reading sessions with varying reader capacities, dual progress tracking, and calendar-based visualization, all while maintaining data integrity and user-friendly operation.
+The app successfully addresses the complex requirements of managing multi-day reading sessions with varying reader capacities, triple progress tracking (lines, paragraphs, and chapters), and calendar-based visualization, all while maintaining data integrity and user-friendly operation.
 
 ---
 

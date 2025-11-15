@@ -266,13 +266,37 @@ class DataService {
     }
   }
 
-  // Add a new reader and update current line and paragraph
+  // Get current chapter number for a book
+  Future<int> getCurrentChapter(String bookId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getInt(StorageKeys.currentChapter(bookId)) ?? 1;
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to get current chapter', e, stackTrace);
+      return 1;
+    }
+  }
+
+  // Set current chapter number for a book
+  Future<void> setCurrentChapter(String bookId, int chapterNumber) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(StorageKeys.currentChapter(bookId), chapterNumber);
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to set current chapter', e, stackTrace);
+      throw StorageException('Failed to set current chapter', originalError: e);
+    }
+  }
+
+  // Add a new reader and update current line, paragraph, and chapter
   Future<void> addReader(Reader reader) async {
     final readers = await loadReaders(reader.bookId);
     readers.add(reader);
     await saveReaders(reader.bookId, readers);
     await setCurrentLine(reader.bookId, reader.endLine + 1);
     await setCurrentParagraph(reader.bookId, reader.endParagraph + 1);
+    // Set current chapter to the next after the last assigned
+    await setCurrentChapter(reader.bookId, reader.endChapter + 1);
   }
 
   // Delete a specific reader and recalculate positions
@@ -295,10 +319,12 @@ class DataService {
     if (readers.isEmpty) {
       await setCurrentLine(bookId, 1);
       await setCurrentParagraph(bookId, 1);
+      await setCurrentChapter(bookId, 1);
     } else {
       final lastReader = readers.last;
       await setCurrentLine(bookId, lastReader.endLine + 1);
       await setCurrentParagraph(bookId, lastReader.endParagraph + 1);
+      await setCurrentChapter(bookId, lastReader.endChapter + 1);
     }
   }
 
@@ -310,6 +336,7 @@ class DataService {
       await prefs.remove(StorageKeys.readers(bookId));
       await setCurrentLine(bookId, 1);
       await setCurrentParagraph(bookId, 1);
+      await setCurrentChapter(bookId, 1);
     } catch (e, stackTrace) {
       AppLogger.error('Failed to clear readers', e, stackTrace);
       throw StorageException('Failed to clear readers', originalError: e);

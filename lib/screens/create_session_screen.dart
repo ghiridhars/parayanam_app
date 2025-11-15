@@ -38,8 +38,10 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
   List<DayConfiguration> _dayConfigs = [];
   final Map<String, TextEditingController> _categoryLineControllers = {};
   final Map<String, TextEditingController> _categoryParagraphControllers = {};
+  final Map<String, TextEditingController> _categoryChapterControllers = {};
   final Map<int, TextEditingController> _dayConfigLineControllers = {};
   final Map<int, TextEditingController> _dayConfigParagraphControllers = {};
+  final Map<int, TextEditingController> _dayConfigChapterControllers = {};
   
   bool _isLoading = false;
 
@@ -94,6 +96,9 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
       _categoryParagraphControllers[category.id] = TextEditingController(
         text: category.paragraphCount.toString(),
       );
+      _categoryChapterControllers[category.id] = TextEditingController(
+        text: category.chapterCount.toString(),
+      );
     }
     
     for (var dayConfig in _dayConfigs) {
@@ -102,6 +107,9 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
       );
       _dayConfigParagraphControllers[dayConfig.dayNumber] = TextEditingController(
         text: dayConfig.maxParagraphs.toString(),
+      );
+      _dayConfigChapterControllers[dayConfig.dayNumber] = TextEditingController(
+        text: dayConfig.maxChapters.toString(),
       );
     }
   }
@@ -159,11 +167,15 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
     for (var category in _categories) {
       final lineController = _categoryLineControllers[category.id];
       final paragraphController = _categoryParagraphControllers[category.id];
+      final chapterController = _categoryChapterControllers[category.id];
       if (lineController != null) {
         category.lineCount = int.tryParse(lineController.text) ?? category.lineCount;
       }
       if (paragraphController != null) {
         category.paragraphCount = int.tryParse(paragraphController.text) ?? category.paragraphCount;
+      }
+      if (chapterController != null) {
+        category.chapterCount = int.tryParse(chapterController.text) ?? category.chapterCount;
       }
     }
     
@@ -171,11 +183,15 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
     for (var dayConfig in _dayConfigs) {
       final lineController = _dayConfigLineControllers[dayConfig.dayNumber];
       final paragraphController = _dayConfigParagraphControllers[dayConfig.dayNumber];
+      final chapterController = _dayConfigChapterControllers[dayConfig.dayNumber];
       if (lineController != null) {
         dayConfig.maxLines = int.tryParse(lineController.text) ?? dayConfig.maxLines;
       }
       if (paragraphController != null) {
         dayConfig.maxParagraphs = int.tryParse(paragraphController.text) ?? dayConfig.maxParagraphs;
+      }
+      if (chapterController != null) {
+        dayConfig.maxChapters = int.tryParse(chapterController.text) ?? dayConfig.maxChapters;
       }
     }
     
@@ -216,10 +232,16 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
     for (var controller in _categoryParagraphControllers.values) {
       controller.dispose();
     }
+    for (var controller in _categoryChapterControllers.values) {
+      controller.dispose();
+    }
     for (var controller in _dayConfigLineControllers.values) {
       controller.dispose();
     }
     for (var controller in _dayConfigParagraphControllers.values) {
+      controller.dispose();
+    }
+    for (var controller in _dayConfigChapterControllers.values) {
       controller.dispose();
     }
     super.dispose();
@@ -394,7 +416,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Set maximum lines and paragraphs for each day',
+                      'Set maximum lines, paragraphs, and chapters for each day',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -456,6 +478,19 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                               ),
                             ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: TextField(
+                                controller: _dayConfigChapterControllers[dayConfig.dayNumber],
+                                decoration: const InputDecoration(
+                                  labelText: 'Max Ch',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                ),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              ),
+                            ),
                           ],
                         ),
                       );
@@ -475,7 +510,7 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Set lines and paragraphs for each category',
+                      'Set lines, paragraphs, and chapters for each category',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey,
@@ -533,6 +568,20 @@ class _CreateSessionScreenState extends State<CreateSessionScreen> {
                                 controller: _categoryParagraphControllers[category.id],
                                 decoration: const InputDecoration(
                                   labelText: '¶',
+                                  border: OutlineInputBorder(),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                ),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            SizedBox(
+                              width: 70,
+                              child: TextField(
+                                controller: _categoryChapterControllers[category.id],
+                                decoration: const InputDecoration(
+                                  labelText: 'Ch',
                                   border: OutlineInputBorder(),
                                   contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                                 ),

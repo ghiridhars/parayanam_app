@@ -13,6 +13,8 @@ void main() {
         endLine: 100,
         startParagraph: 1,
         endParagraph: 10,
+        startChapter: 1,
+        endChapter: 5,
         bookId: 'bhagavatam',
         dayNumber: 1,
       );
@@ -30,6 +32,8 @@ void main() {
         endLine: 120,
         startParagraph: 5,
         endParagraph: 12,
+        startChapter: 2,
+        endChapter: 4,
         bookId: 'bhagavatam',
         dayNumber: 1,
       );
@@ -47,6 +51,8 @@ void main() {
         endLine: 50,
         startParagraph: 1,
         endParagraph: 5,
+        startChapter: 1,
+        endChapter: 2,
         bookId: 'bhagavatam',
         dayNumber: 1,
       );
@@ -65,6 +71,8 @@ void main() {
         endLine: 40,
         startParagraph: 2,
         endParagraph: 5,
+        startChapter: 1,
+        endChapter: 1,
         bookId: 'bhagavatam',
         dayNumber: 2,
       );
@@ -141,6 +149,8 @@ void main() {
         endLine: 75,
         startParagraph: 3,
         endParagraph: 8,
+        startChapter: 2,
+        endChapter: 3,
         bookId: 'ramayanam',
         dayNumber: 3,
       );
@@ -155,10 +165,13 @@ void main() {
       expect(restored.endLine, original.endLine);
       expect(restored.startParagraph, original.startParagraph);
       expect(restored.endParagraph, original.endParagraph);
+      expect(restored.startChapter, original.startChapter);
+      expect(restored.endChapter, original.endChapter);
       expect(restored.bookId, original.bookId);
       expect(restored.dayNumber, original.dayNumber);
       expect(restored.totalLines, original.totalLines);
       expect(restored.totalParagraphs, original.totalParagraphs);
+      expect(restored.totalChapters, original.totalChapters);
     });
   });
 }

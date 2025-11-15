@@ -12,23 +12,30 @@ class AppConstants {
   
   /// Default maximum paragraphs that can be assigned per day
   static const int defaultMaxParagraphsPerDay = 100;
+  
+  /// Default maximum chapters that can be assigned per day
+  static const int defaultMaxChaptersPerDay = 50;
 
   // === Reader Category Defaults ===
   /// Category A - High capacity readers
   static const int categoryALines = 100;
   static const int categoryAParagraphs = 10;
+  static const int categoryAChapters = 5;
   
   /// Category B - Medium-high capacity readers
   static const int categoryBLines = 70;
   static const int categoryBParagraphs = 7;
+  static const int categoryBChapters = 3;
   
   /// Category C - Medium capacity readers
   static const int categoryCLines = 50;
   static const int categoryCParagraphs = 5;
+  static const int categoryCChapters = 2;
   
   /// Category D - Lower capacity readers
   static const int categoryDLines = 30;
   static const int categoryDParagraphs = 3;
+  static const int categoryDChapters = 1;
 
   // === UI Opacity Values ===
   /// Light overlay opacity (~20%)

@@ -38,6 +38,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
   List<DayConfiguration> _dayConfigs = [];
   int _currentLine = 1;
   int _currentParagraph = 1;
+  int _currentChapter = 1;
   int _currentDay = 1;
   String? _selectedCategoryId;
   bool _isLoading = true;
@@ -69,21 +70,24 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
       dayConfigs = await _dataService.loadDayConfigurations(widget.book.id, widget.book.totalDays);
     }
     
-    // Calculate current line and paragraph based on previous days
+    // Calculate current line, paragraph, and chapter based on previous days
     int currentLine = 1;
     int currentParagraph = 1;
+    int currentChapter = 1;
     
-    // Add up all lines and paragraphs from previous days
+    // Add up all lines, paragraphs, and chapters from previous days
     for (int day = 1; day < widget.selectedDay; day++) {
       final dayReaders = allReaders.where((r) => r.dayNumber == day).toList();
       if (dayReaders.isNotEmpty) {
-        // Find the max end line and paragraph for this day
+        // Find the max end line, paragraph, and chapter for this day
         currentLine = dayReaders.map((r) => r.endLine).reduce((a, b) => a > b ? a : b) + 1;
         currentParagraph = dayReaders.map((r) => r.endParagraph).reduce((a, b) => a > b ? a : b) + 1;
+        currentChapter = dayReaders.map((r) => r.endChapter).reduce((a, b) => a > b ? a : b) + 1;
       } else if (day <= dayConfigs.length) {
         // Use day config limits if no readers assigned yet
         currentLine += dayConfigs[day - 1].maxLines;
         currentParagraph += dayConfigs[day - 1].maxParagraphs;
+        currentChapter += dayConfigs[day - 1].maxChapters;
       }
     }
     
@@ -91,12 +95,14 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
     if (readers.isNotEmpty) {
       currentLine = readers.map((r) => r.endLine).reduce((a, b) => a > b ? a : b) + 1;
       currentParagraph = readers.map((r) => r.endParagraph).reduce((a, b) => a > b ? a : b) + 1;
+      currentChapter = readers.map((r) => r.endChapter).reduce((a, b) => a > b ? a : b) + 1;
     }
     
     setState(() {
       _readers = readers;
       _currentLine = currentLine;
       _currentParagraph = currentParagraph;
+      _currentChapter = currentChapter;
       _categories = categories;
       _currentDay = widget.selectedDay;
       _dayConfigs = dayConfigs;
@@ -123,14 +129,27 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
       (c) => c.id == _selectedCategoryId,
     );
 
-    // Check if adding this reader would exceed day limit
+    // Check if adding this reader would exceed day limit (cumulative)
     if (_currentDay <= _dayConfigs.length) {
       final dayConfig = _dayConfigs[_currentDay - 1];
-      final proposedEndLine = _currentLine + category.lineCount - 1;
-      final proposedEndParagraph = _currentParagraph + category.paragraphCount - 1;
-      
-      if (proposedEndLine > dayConfig.maxLines * _currentDay || 
-          proposedEndParagraph > dayConfig.maxParagraphs * _currentDay) {
+
+      // Calculate cumulative usage for the current day
+      int totalLines = 0;
+      int totalParagraphs = 0;
+      int totalChapters = 0;
+      for (final reader in _readers.where((r) => r.dayNumber == _currentDay)) {
+        totalLines += reader.totalLines;
+        totalParagraphs += reader.totalParagraphs;
+        totalChapters += reader.totalChapters;
+      }
+
+      final newTotalLines = totalLines + category.lineCount;
+      final newTotalParagraphs = totalParagraphs + category.paragraphCount;
+      final newTotalChapters = totalChapters + category.chapterCount;
+
+      if (newTotalLines > dayConfig.maxLines ||
+          newTotalParagraphs > dayConfig.maxParagraphs ||
+          newTotalChapters > dayConfig.maxChapters) {
         final shouldContinue = await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
@@ -138,7 +157,8 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
             content: Text(
               'Adding this reader would exceed Day $_currentDay limits:\n'
               'Lines: ${dayConfig.maxLines}\n'
-              'Paragraphs: ${dayConfig.maxParagraphs}\n\n'
+              'Paragraphs: ${dayConfig.maxParagraphs}\n'
+              'Chapters: ${dayConfig.maxChapters}\n\n'
               'Do you want to move to Day ${_currentDay + 1}?'
             ),
             actions: [
@@ -174,6 +194,8 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
       endLine: _currentLine + category.lineCount - 1,
       startParagraph: _currentParagraph,
       endParagraph: _currentParagraph + category.paragraphCount - 1,
+      startChapter: _currentChapter,
+      endChapter: _currentChapter + category.chapterCount - 1,
       bookId: widget.book.id,
       dayNumber: widget.selectedDay,
     );
@@ -184,6 +206,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
       _readers.add(reader);
       _currentLine = reader.endLine + 1;
       _currentParagraph = reader.endParagraph + 1;
+      _currentChapter = reader.endChapter + 1;
       _nameController.clear();
       _selectedCategoryId = null;
     });
@@ -192,7 +215,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
     
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('${reader.name} assigned:\nLines ${reader.startLine}-${reader.endLine}\nParagraphs ${reader.startParagraph}-${reader.endParagraph}'),
+        content: Text('${reader.name} assigned:\nLines ${reader.startLine}-${reader.endLine}\nParagraphs ${reader.startParagraph}-${reader.endParagraph}\nChapters ${reader.startChapter}-${reader.endChapter}'),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 3),
       ),
@@ -204,7 +227,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Clear All Readers?'),
-        content: const Text('This will remove all reader assignments and reset to Day 1, Line 1, Paragraph 1. Are you sure?'),
+        content: const Text('This will remove all reader assignments and reset to Day 1, Line 1, Paragraph 1, Chapter 1. Are you sure?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -225,6 +248,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
         _readers.clear();
         _currentLine = 1;
         _currentParagraph = 1;
+        _currentChapter = 1;
         _currentDay = 1;
       });
 
@@ -244,7 +268,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Reader?'),
-        content: Text('Remove ${reader.name} from the assignment list?\n\nThis will undo the assignment:\nLines ${reader.startLine}-${reader.endLine}\nParagraphs ${reader.startParagraph}-${reader.endParagraph}'),
+        content: Text('Remove ${reader.name} from the assignment list?\n\nThis will undo the assignment:\nLines ${reader.startLine}-${reader.endLine}\nParagraphs ${reader.startParagraph}-${reader.endParagraph}\nChapters ${reader.startChapter}-${reader.endChapter}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -411,7 +435,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
                               ),
                             ),
                             const SizedBox(width: 12),
-                            Text('${category.name} (${category.lineCount}L, ${category.paragraphCount}¶)'),
+                            Text('${category.name} (${category.lineCount}L, ${category.paragraphCount}¶, ${category.chapterCount}Ch)'),
                           ],
                         ),
                       );
@@ -439,7 +463,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              'Line $_currentLine | ¶ $_currentParagraph',
+                              'Line $_currentLine | ¶ $_currentParagraph | Ch $_currentChapter',
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -458,7 +482,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
                                 style: TextStyle(fontSize: 12, color: Colors.grey),
                               ),
                               Text(
-                                '${_dayConfigs[_currentDay - 1].maxLines} lines | ${_dayConfigs[_currentDay - 1].maxParagraphs} ¶',
+                                '${_dayConfigs[_currentDay - 1].maxLines} lines | ${_dayConfigs[_currentDay - 1].maxParagraphs} ¶ | ${_dayConfigs[_currentDay - 1].maxChapters} ch',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: Colors.grey,
@@ -467,42 +491,68 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
                             ],
                           ),
                           const SizedBox(height: 4),
-                          Row(
+                          Column(
                             children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('Lines', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                    LinearProgressIndicator(
-                                      value: _currentLine / _dayConfigs[_currentDay - 1].maxLines,
-                                      backgroundColor: Colors.grey.shade300,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        _currentLine / _dayConfigs[_currentDay - 1].maxLines > 0.8
-                                            ? Colors.orange
-                                            : Colors.blue,
-                                      ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Lines', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                        LinearProgressIndicator(
+                                          value: _currentLine / _dayConfigs[_currentDay - 1].maxLines,
+                                          backgroundColor: Colors.grey.shade300,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            _currentLine / _dayConfigs[_currentDay - 1].maxLines > 0.8
+                                                ? Colors.orange
+                                                : Colors.blue,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Paragraphs', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                        LinearProgressIndicator(
+                                          value: _currentParagraph / _dayConfigs[_currentDay - 1].maxParagraphs,
+                                          backgroundColor: Colors.grey.shade300,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            _currentParagraph / _dayConfigs[_currentDay - 1].maxParagraphs > 0.8
+                                                ? Colors.orange
+                                                : Colors.green,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    const Text('Paragraphs', style: TextStyle(fontSize: 10, color: Colors.grey)),
-                                    LinearProgressIndicator(
-                                      value: _currentParagraph / _dayConfigs[_currentDay - 1].maxParagraphs,
-                                      backgroundColor: Colors.grey.shade300,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        _currentParagraph / _dayConfigs[_currentDay - 1].maxParagraphs > 0.8
-                                            ? Colors.orange
-                                            : Colors.green,
-                                      ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        const Text('Chapters', style: TextStyle(fontSize: 10, color: Colors.grey)),
+                                        LinearProgressIndicator(
+                                          value: _currentChapter / _dayConfigs[_currentDay - 1].maxChapters,
+                                          backgroundColor: Colors.grey.shade300,
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                            _currentChapter / _dayConfigs[_currentDay - 1].maxChapters > 0.8
+                                                ? Colors.orange
+                                                : Colors.purple,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -569,6 +619,7 @@ class _ReaderAssignmentScreenState extends State<ReaderAssignmentScreen> {
                               const SizedBox(height: 4),
                               Text('Lines: ${reader.startLine}-${reader.endLine} (${reader.totalLines} lines)'),
                               Text('Paragraphs: ${reader.startParagraph}-${reader.endParagraph} (${reader.totalParagraphs} ¶)'),
+                              Text('Chapters: ${reader.startChapter}-${reader.endChapter} (${reader.totalChapters} ch)'),
                               Text(
                                 'Punch In: ${_timeFormat.format(reader.punchInTime)} - ${_dateFormat.format(reader.punchInTime)}',
                                 style: const TextStyle(fontSize: 12),

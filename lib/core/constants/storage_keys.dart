@@ -25,6 +25,9 @@ class StorageKeys {
   /// Current paragraph number for a book: 'current_paragraph_{bookId}'
   static String currentParagraph(String bookId) => 'current_paragraph_$bookId';
   
+  /// Current chapter number for a book: 'current_chapter_{bookId}'
+  static String currentChapter(String bookId) => 'current_chapter_$bookId';
+  
   /// Current day for a book: 'current_day_{bookId}'
   static String currentDay(String bookId) => 'current_day_$bookId';
   

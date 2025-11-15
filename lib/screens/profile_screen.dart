@@ -298,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Set maximum lines and paragraphs that can be read each day',
+                    'Set maximum lines, paragraphs, and chapters that can be read each day',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
@@ -436,6 +436,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
               },
             ),
           ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: TextEditingController(
+                text: dayConfig.maxChapters.toString(),
+              ),
+              decoration: InputDecoration(
+                labelText: 'Max Ch',
+                border: const OutlineInputBorder(),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                suffixIcon: const Icon(Icons.book),
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) {
+                dayConfig.maxChapters = int.tryParse(value) ?? dayConfig.maxChapters;
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -512,6 +531,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onChanged: (value) {
                 category.paragraphCount = int.tryParse(value) ?? category.paragraphCount;
+              },
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 70,
+            child: TextField(
+              controller: TextEditingController(
+                text: category.chapterCount.toString(),
+              ),
+              decoration: const InputDecoration(
+                labelText: 'Ch',
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              ),
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: (value) {
+                category.chapterCount = int.tryParse(value) ?? category.chapterCount;
               },
             ),
           ),
