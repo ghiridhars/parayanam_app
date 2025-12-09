@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/data_service.dart';
+import '../core/constants/app_config.dart';
 import 'book_selection_screen.dart';
+import 'sessions_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -29,12 +31,22 @@ class _LoginScreenState extends State<LoginScreen> {
     if (isLoggedIn) {
       final profile = await _dataService.getCurrentUserProfile();
       if (profile != null && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BookSelectionScreen(userProfile: profile),
-          ),
-        );
+        // In demo mode, go directly to SessionsScreen
+        if (AppConfig.isDemoMode) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SessionsScreen(userProfile: profile),
+            ),
+          );
+        } else {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BookSelectionScreen(userProfile: profile),
+            ),
+          );
+        }
         return;
       }
     }

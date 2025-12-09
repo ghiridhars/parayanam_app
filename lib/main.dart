@@ -1,7 +1,24 @@
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
+import 'core/constants/app_config.dart';
+import 'services/data_service.dart';
+import 'models/user_profile.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize demo mode if enabled
+  if (AppConfig.isDemoMode) {
+    final dataService = DataService();
+    final demoProfile = UserProfile(
+      email: AppConfig.demoUserEmail,
+      name: AppConfig.demoUserName,
+      passwordHash: 'demo-hash',
+      createdAt: DateTime.now(),
+    );
+    await dataService.setDemoUser(demoProfile);
+  }
+  
   runApp(const MyApp());
 }
 

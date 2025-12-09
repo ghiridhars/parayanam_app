@@ -156,6 +156,25 @@ class DataService {
     return email != null;
   }
 
+  // Set demo user for demo mode
+  Future<void> setDemoUser(UserProfile profile) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Save user profile
+      final userKey = StorageKeys.userProfile(profile.email);
+      await prefs.setString(userKey, jsonEncode(profile.toJson()));
+      
+      // Set as current user
+      await prefs.setString(StorageKeys.currentUserEmail, profile.email);
+      
+      AppLogger.info('Demo user set', profile.email);
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to set demo user', e, stackTrace);
+      rethrow;
+    }
+  }
+
   // Save categories for a book
   Future<void> saveCategories(String bookId, List<ReaderCategory> categories) async {
     try {
