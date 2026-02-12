@@ -2,6 +2,7 @@
 
 A Flutter application for managing reading assignments for religious texts like Bhagavatam, Sivapuranam, and Ramayanam with session-based configuration and calendar visualization.
 
+
 ## Features
 
 ### 1. Login Screen
